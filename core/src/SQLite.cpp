@@ -7,7 +7,9 @@ namespace SQLiteWrapper
 		: m_dbPath(dbPath)
 		, m_db(nullptr)
 		, m_logger("SQLite:" + dbPath)
+		, m_watcher(dbPath, FileChangeWatcher::Mode::polling)
 	{
+		connect(&m_watcher, &FileChangeWatcher::onFileChanged, this, &SQLite::onDBFileChanged);
 	}
 
 	SQLite::~SQLite()
@@ -153,6 +155,7 @@ namespace SQLiteWrapper
 
 	bool SQLite::commitTransaction()
 	{
+		m_logger.logInfo("Committing transaction");
 		return execute("COMMIT;");
 	}
 
@@ -185,6 +188,13 @@ namespace SQLiteWrapper
 			m_logger.logError("SQLite logError: " + std::string(sqlite3_errstr(rc)));
 		}
 		return rc;
+	}
+
+
+	void SQLite::onDBFileChanged(const std::string& path)
+	{
+		SQLW_UNUSED(path);
+		emit onDBChanged();
 	}
 
 

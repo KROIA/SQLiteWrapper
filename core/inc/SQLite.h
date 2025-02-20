@@ -2,8 +2,9 @@
 
 #include "SQLiteWrapper_base.h"
 #include <string>
-#include <Logger.h>
+#include <QObject>
 #include "sqlite3.h"
+#include "FileChangeWatcher.h"
 
 namespace SQLiteWrapper
 {
@@ -17,8 +18,9 @@ namespace SQLiteWrapper
      *
      * @note The SQLite library must be linked in your project to use this class.
      */
-    class SQLITE_WRAPPER_EXPORT SQLite
+    class SQLITE_WRAPPER_EXPORT SQLite : public QObject
     {
+		Q_OBJECT
     public:
         /**
          * @brief Constructor. It does not open the database.
@@ -168,6 +170,17 @@ namespace SQLiteWrapper
          */
         const std::string& getDBPath() const { return m_dbPath; }
 
+    signals:
+        void onDBChanged();
+
+    private slots:
+        /**
+         * @brief Slot for handling database file changes.
+         *
+         * @param path The path to the changed file.
+         */
+        void onDBFileChanged(const std::string& path);
+
     private:
         /**
          * @brief Handles SQLite logError codes and logs any issues.
@@ -178,9 +191,13 @@ namespace SQLiteWrapper
          */
         int handleSQLiteError(int rc);
 
+	
+
+
         const std::string m_dbPath; ///< Path to the SQLite database file.
         sqlite3* m_db; ///< SQLite database connection.
         Log::LogObject m_logger; ///< Logger for logError handling.
+		FileChangeWatcher m_watcher; ///< File change watcher for database file changes.
     };
 
 }

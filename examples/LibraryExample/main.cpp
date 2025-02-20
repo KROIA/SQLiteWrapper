@@ -31,8 +31,9 @@ int main(int argc, char* argv[])
 	Log::UI::NativeConsoleView consoleView;
     consoleView.show();
 
-    concurencyTest();
+    //concurencyTest();
 
+	//SQLiteWrapper::SQLite db("T:/Alex Krieg/example.db");
 	SQLiteWrapper::SQLite db("example.db");
     if (db.open())
     {
