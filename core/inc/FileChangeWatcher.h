@@ -27,6 +27,8 @@ namespace SQLiteWrapper
 		~FileChangeWatcher();
 
 		void setMode(Mode mode);
+		Mode getMode() const { return m_mode; }
+		const std::string& getPath() const { return m_path; }
 		
 		
 

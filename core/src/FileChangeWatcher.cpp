@@ -208,7 +208,7 @@ namespace SQLiteWrapper
 #endif
 
 		if (m_eventHandle.load() == INVALID_HANDLE_VALUE) {
-			Logger::logError("FileChangeWatcher: Starting directory monitoring: " + Utilities::getLastErrorString(GetLastError()) + "\n");
+			Logger::logError("FileChangeWatcher: Starting directory monitoring: " + Utilities::getLastErrorString(GetLastError()));
 			return;
 		}
 

@@ -8,7 +8,7 @@ namespace SQLiteWrapper
 {
 	namespace Utilities
 	{
-		std::string getLastErrorString(DWORD error)
+		inline std::string getLastErrorString(DWORD error)
 		{
 			std::string errorString;
 			LPSTR messageBuffer = nullptr;

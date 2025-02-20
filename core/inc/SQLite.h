@@ -5,6 +5,7 @@
 #include <QObject>
 #include "sqlite3.h"
 #include "FileChangeWatcher.h"
+#include "LockFile.h"
 
 namespace SQLiteWrapper
 {
