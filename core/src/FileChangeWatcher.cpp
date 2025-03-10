@@ -188,7 +188,7 @@ namespace SQLiteWrapper
 	{
 		SQLW_FILE_WATCHER_PROFILING_THREAD("FileChangeWatcher");
 #ifdef SQLW_PROFILING
-		std::string title = ("FileChangeWatcher \"" + m_filePath + "\"");
+		const std::string title = ("FileChangeWatcher \"" + m_path + "\"");
 		SQLW_FILE_WATCHER_PROFILING_BLOCK(title.c_str(), SQLW_COLOR_STAGE_7);
 #endif
 		DWORD bytesReturned;

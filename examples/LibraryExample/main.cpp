@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
 
 	//SQLiteWrapper::SQLite db("T:/Alex Krieg/example.db");
 	//SQLiteWrapper::LockFile lock("C:\\Users\\KRIA\\Documents\\Visual Studio 2022\\Projects\\SQLiteWrapper\\build\\example.db.lock");
-	SQLiteWrapper::LockFile lock("T:/Alex Krieg/exampleA.lock");
+	SQLiteWrapper::LockFile lock("exampleA.lock");
 	if (lock.tryGetLock() == SQLiteWrapper::LockFile::LockStatus::locked)
 	{
 		std::cout << "Locked\n";
