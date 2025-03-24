@@ -22,13 +22,16 @@ namespace SQLiteWrapper
 			polling,  // checks for a file change when asked
 			winApi    // Uses the "FindFirstChangeNotification" function to monitor file changes (does not work on network drives)
 		};
+		FileChangeWatcher();
 		FileChangeWatcher(const std::string& path);
 		FileChangeWatcher(const std::string& path, Mode mode);
 		~FileChangeWatcher();
 
 		void setMode(Mode mode);
 		Mode getMode() const { return m_mode; }
+		void setPath(const std::string& path);
 		const std::string& getPath() const { return m_path; }
+		void setModeAndPath(Mode mode, const std::string& path);
 		
 		
 
@@ -65,7 +68,7 @@ namespace SQLiteWrapper
 		std::string m_md5;
 		QTimer m_timer;
 
-		const std::string m_path;
+		std::string m_path;
 		Mode m_mode;
 		std::filesystem::file_time_type m_lastModificationTime;
 		std::atomic<bool> m_fileChanged;

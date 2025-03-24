@@ -3,6 +3,14 @@
 namespace SQLiteWrapper
 {
 
+	SQLite::SQLite()
+		: m_dbPath("")
+		, m_db(nullptr)
+		, m_logger("SQLite")
+		, m_watcher()
+	{
+		connect(&m_watcher, &FileChangeWatcher::onFileChanged, this, &SQLite::onDBFileChanged);
+	}
 	SQLite::SQLite(const std::string& dbPath)
 		: m_dbPath(dbPath)
 		, m_db(nullptr)
@@ -16,6 +24,21 @@ namespace SQLiteWrapper
 	{
 		if (m_db)
 			close();
+	}
+
+
+	void SQLite::setPath(const std::string& dbPath)
+	{
+		if (m_dbPath == dbPath)
+			return;
+		if (isOpen())
+		{
+			m_logger.logWarning("Database is open, close it before changing the path");
+			return;
+		}
+		m_logger.setName("SQLite:" + dbPath);
+		m_dbPath = dbPath;
+		m_watcher.setModeAndPath(FileChangeWatcher::Mode::polling, m_dbPath);
 	}
 
 	bool SQLite::open()

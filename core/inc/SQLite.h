@@ -29,11 +29,14 @@ namespace SQLiteWrapper
          * @param dbPath The path to the SQLite database file.
          */
         SQLite(const std::string& dbPath);
+        SQLite();
 
         /**
          * @brief Destructor that ensures the database is closed.
          */
         ~SQLite();
+
+        void setPath(const std::string& dbPath);
 
         /**
          * @brief Opens the SQLite database connection.
@@ -195,7 +198,7 @@ namespace SQLiteWrapper
 	
 
 
-        const std::string m_dbPath; ///< Path to the SQLite database file.
+        std::string m_dbPath; ///< Path to the SQLite database file.
         sqlite3* m_db; ///< SQLite database connection.
         Log::LogObject m_logger; ///< Logger for logError handling.
 		FileChangeWatcher m_watcher; ///< File change watcher for database file changes.

@@ -10,6 +10,17 @@
 
 namespace SQLiteWrapper
 {
+	FileChangeWatcher::FileChangeWatcher()
+		: m_path("")
+		, m_mode(Mode::polling)
+	{
+		m_stopFlag.store(false);
+		m_paused.store(false);
+		m_fileChanged.store(false);
+		m_eventHandle.store(nullptr);
+		connect(&m_timer, &QTimer::timeout, this, &FileChangeWatcher::onPollingTimerTimeout);
+		connect(this, &FileChangeWatcher::onFileChangedInternal, this, &FileChangeWatcher::onFileChangedInternalSlot, Qt::QueuedConnection);
+	}
 	FileChangeWatcher::FileChangeWatcher(const std::string& path)
 		: m_path(path)
 		, m_mode(Mode::polling)
@@ -46,6 +57,21 @@ namespace SQLiteWrapper
 			return;
 		stopWatching();
 		m_mode = mode;
+		startWatching();
+	}
+	void FileChangeWatcher::setPath(const std::string& path)
+	{
+		if (path == m_path)
+			return;
+		stopWatching();
+		m_path = path;
+		startWatching();		
+	}
+	void FileChangeWatcher::setModeAndPath(Mode mode, const std::string& path)
+	{
+		stopWatching();
+		m_mode = mode;
+		m_path = path;
 		startWatching();
 	}
 	bool FileChangeWatcher::hasChanged()
