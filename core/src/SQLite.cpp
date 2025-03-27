@@ -147,6 +147,22 @@ namespace SQLiteWrapper
 		return execute("DROP TABLE " + tableName + ";");
 	}
 
+	bool SQLite::dropDatabase()
+	{
+		if (m_db)
+		{
+			m_logger.logWarning("Database is open, close it before dropping it");
+			return false;
+		}
+		if (std::remove(m_dbPath.c_str()) != 0)
+		{
+			m_logger.logError("Failed to remove database file: " + m_dbPath);
+			return false;
+		}
+		m_logger.logInfo("Database file removed: " + m_dbPath);
+		return true;
+	}
+
 	std::vector<std::vector<std::string>> SQLite::fetchAll(const std::string& query)
 	{
 		std::vector<std::vector<std::string>> results;
@@ -163,7 +179,7 @@ namespace SQLiteWrapper
 			for (int i = 0; i < columnCount; ++i)
 			{
 				const char* text = reinterpret_cast<const char*>(sqlite3_column_text(stmt, i));
-				row.push_back(text ? text : "");
+				row.emplace_back(text ? text : "");
 			}
 			results.push_back(row);
 		}

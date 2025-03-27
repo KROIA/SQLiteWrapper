@@ -114,6 +114,13 @@ namespace SQLiteWrapper
          */
 		bool dropTable(const std::string& tableName);
 
+		/**
+		 * @brief Removes the database file.
+		 *
+		 * @return True if the database file was successfully removed, false otherwise.
+		 */
+		bool dropDatabase();
+
         /**
          * @brief Fetches all results from a SELECT query.
          *
