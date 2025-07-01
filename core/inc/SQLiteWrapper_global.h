@@ -51,18 +51,18 @@
 /// USER_SECTION_END
 
 #if defined(SQLITEWRAPPER_LIB)
-	#pragma warning (logError : 4715) // not all control paths return a value shuld be an logError instead of a warning
-	#pragma warning (logError : 4700) // uninitialized local variable used shuld be an logError instead of a warning
-	#pragma warning (logError : 4244) // Implicit conversions between data types 
-	#pragma warning (logError : 4100) // Unused variables
-	#pragma warning (logError : 4018) // Type mismatch 
-	#pragma warning (logError : 4996) // Unsafe function calls
-	#pragma warning (logError : 4456) // declaration of 'x' hides previous local declaration
-	#pragma warning (logError : 4065) // switch statement contains 'default' but no 'case' labels
-	#pragma warning (logError : 4189) // Unused return value
-	#pragma warning (logError : 4996) // unsafe function calls
-	#pragma warning (logError : 4018) // signed/unsigned mismatch
-	#pragma warning (logError : 4172) // Returning address of local temporary object
+	#pragma warning (error : 4715) // not all control paths return a value shuld be an logError instead of a warning
+	#pragma warning (error : 4700) // uninitialized local variable used shuld be an logError instead of a warning
+	#pragma warning (error : 4244) // Implicit conversions between data types 
+	#pragma warning (error : 4100) // Unused variables
+	#pragma warning (error : 4018) // Type mismatch 
+	#pragma warning (error : 4996) // Unsafe function calls
+	#pragma warning (error : 4456) // declaration of 'x' hides previous local declaration
+	#pragma warning (error : 4065) // switch statement contains 'default' but no 'case' labels
+	#pragma warning (error : 4189) // Unused return value
+	#pragma warning (error : 4996) // unsafe function calls
+	#pragma warning (error : 4018) // signed/unsigned mismatch
+	#pragma warning (error : 4172) // Returning address of local temporary object
 #endif
 
 /// USER_SECTION_START 5
