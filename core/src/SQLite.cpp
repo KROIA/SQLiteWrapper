@@ -154,6 +154,14 @@ namespace SQLiteWrapper
 			m_logger.logWarning("Database is open, close it before dropping it");
 			return false;
 		}
+		if (isOpen())
+		{
+			if (!close())
+			{
+				m_logger.logError("Failed to close database before dropping it");
+				return false;
+			}
+		}
 		if (std::remove(m_dbPath.c_str()) != 0)
 		{
 			m_logger.logError("Failed to remove database file: " + m_dbPath);
