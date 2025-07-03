@@ -181,6 +181,9 @@ namespace SQLiteWrapper
          */
         const std::string& getDBPath() const { return m_dbPath; }
 
+
+
+
     signals:
         void onDBChanged();
 

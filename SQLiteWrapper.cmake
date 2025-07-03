@@ -21,7 +21,8 @@ function(dep LIBRARY_MACRO_NAME SHARED_LIB STATIC_LIB STATIC_PROFILE_LIB)
     FetchContent_MakeAvailable(${LIB_NAME})
 
     # Add this library to the specific profiles of this project
-    list(APPEND DEPS_FOR_SHARED_LIB ${LIB_NAME}_shared)
+    # Only static build is supported for this library
+    list(APPEND DEPS_FOR_SHARED_LIB ${LIB_NAME}_static)
     list(APPEND DEPS_FOR_STATIC_LIB ${LIB_NAME}_static)
     list(APPEND DEPS_FOR_STATIC_PROFILE_LIB ${LIB_NAME}_static_profile) # only use for static profiling profile
 

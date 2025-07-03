@@ -1,7 +1,7 @@
 #pragma once
 
 /// USER_SECTION_START 1
-
+/*
 /// USER_SECTION_END
 
 #include <chrono>
@@ -21,7 +21,10 @@
 #endif
 
 /// USER_SECTION_START 2
-
+*/
+#include <chrono>
+// Only allow static library build
+#define SQLITE_WRAPPER_EXPORT
 /// USER_SECTION_END
 
 #ifdef QT_ENABLED
