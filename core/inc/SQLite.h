@@ -182,6 +182,10 @@ namespace SQLiteWrapper
         const std::string& getDBPath() const { return m_dbPath; }
 
 
+		void setLoggerParent(const Log::LogObject& logger) 
+        { 
+            m_logger.setParentID(logger.getID()); 
+        }
 
 
     signals:

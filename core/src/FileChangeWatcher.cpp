@@ -13,6 +13,7 @@ namespace SQLiteWrapper
 	FileChangeWatcher::FileChangeWatcher()
 		: m_path("")
 		, m_mode(Mode::polling)
+		, m_logger("FileChangeWatcher")
 	{
 		m_stopFlag.store(false);
 		m_paused.store(false);
@@ -24,6 +25,7 @@ namespace SQLiteWrapper
 	FileChangeWatcher::FileChangeWatcher(const std::string& path)
 		: m_path(path)
 		, m_mode(Mode::polling)
+		, m_logger("FileChangeWatcher")
 	{
 		m_stopFlag.store(false);
 		m_paused.store(false);
@@ -36,6 +38,7 @@ namespace SQLiteWrapper
 	FileChangeWatcher::FileChangeWatcher(const std::string& path, Mode mode)
 		: m_path(path)
 		, m_mode(mode)
+		, m_logger("FileChangeWatcher")
 	{
 		m_stopFlag.store(false);
 		m_paused.store(false);
@@ -169,7 +172,7 @@ namespace SQLiteWrapper
 		std::filesystem::path file(m_path);
 
 		if (!std::filesystem::exists(file)) {
-			Logger::logError("FileChangeWatcher: File: \"" + m_path + "\" does not exist!");
+			error("FileChangeWatcher: File: \"" + m_path + "\" does not exist!");
 			return false;
 		}
 		// Wait for a short duration to ensure any ongoing file operation is completed
@@ -234,7 +237,7 @@ namespace SQLiteWrapper
 #endif
 
 		if (m_eventHandle.load() == INVALID_HANDLE_VALUE) {
-			Logger::logError("FileChangeWatcher: Starting directory monitoring: " + Utilities::getLastErrorString(GetLastError()));
+			error("FileChangeWatcher: Starting directory monitoring: " + Utilities::getLastErrorString(GetLastError()));
 			return;
 		}
 
@@ -268,8 +271,8 @@ namespace SQLiteWrapper
 #ifdef SQLW_DEBUG
 					if (!res)
 					{
-						DWORD error = GetLastError();
-						Logger::logError("FileChangeWatcher: FindNextChangeNotification. GetLastError() =  " + std::to_string(error) + " : " + Utilities::getLastErrorString(error));
+						DWORD lastErr = GetLastError();
+						error("FileChangeWatcher: FindNextChangeNotification. GetLastError() =  " + std::to_string(lastErr) + " : " + Utilities::getLastErrorString(lastErr));
 					}
 #else 
 					SQLW_UNUSED(res);
@@ -282,7 +285,7 @@ namespace SQLiteWrapper
 					std::unique_lock<std::mutex> lock(m_mutex);
 
 					m_fileChanged.store(true);
-					Logger::logInfo("FileChangeWatcher: File changed: " + m_path);
+					info("FileChangeWatcher: File changed: " + m_path);
 					emit onFileChangedInternal(nullptr);
 					while (m_fileChanged && !m_stopFlag.load()) {
 						QApplication::processEvents();
@@ -296,8 +299,8 @@ namespace SQLiteWrapper
 			}
 #ifdef SQLW_DEBUG
 			else {
-				DWORD error = GetLastError();
-				Logger::logError("FileChangeWatcher: Waiting for file changes. GetLastError() =  " + std::to_string(error) + " : " + Utilities::getLastErrorString(error));
+				DWORD lastErr = GetLastError();
+				error("FileChangeWatcher: Waiting for file changes. GetLastError() =  " + std::to_string(lastErr) + " : " + Utilities::getLastErrorString(lastErr));
 			}
 #endif
 		}
@@ -313,14 +316,14 @@ namespace SQLiteWrapper
 		if (!success)
 		{
 #ifdef SQLW_DEBUG
-			Logger::logError("FileChangeWatcher: Could not calculate the MD5 hash of the file: " + m_path);
+			error("FileChangeWatcher: Could not calculate the MD5 hash of the file: " + m_path);
 #endif
 			return;
 		}
 		if (md5 != m_md5 && m_md5 != "")
 		{
 			m_fileChanged.store(true);
-			Logger::logInfo("FileChangeWatcher: File changed: " + m_path);
+			info("FileChangeWatcher: File changed: " + m_path);
 		}
 		m_md5 = md5;
 	}
@@ -330,7 +333,7 @@ namespace SQLiteWrapper
 		QFile file(m_path.c_str());
 		if (!file.open(QIODevice::ReadOnly)) {
 #ifdef SQLW_DEBUG
-			Logger::logError("FileChangeWatcher: Could not open file: " + m_path +" to calculate the MD5 hash");
+			error("FileChangeWatcher: Could not open file: " + m_path +" to calculate the MD5 hash");
 #endif
 			success = false;
 			return "";
@@ -339,7 +342,7 @@ namespace SQLiteWrapper
 		QCryptographicHash hash(QCryptographicHash::Md5);
 		if (!hash.addData(&file)) {
 #ifdef SQLW_DEBUG
-			Logger::logError("FileChangeWatcher: Could not read file: " + m_path + " to calculate the MD5 hash");
+			error("FileChangeWatcher: Could not read file: " + m_path + " to calculate the MD5 hash");
 #endif
 			success = false;
 			return "";

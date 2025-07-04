@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <QObject>
 #include <QTimer>
+#include "Logger.h"
 
 
 namespace SQLiteWrapper
@@ -33,6 +34,10 @@ namespace SQLiteWrapper
 		const std::string& getPath() const { return m_path; }
 		void setModeAndPath(Mode mode, const std::string& path);
 		
+		void setLoggerParent(const Log::LogObject& parent)
+		{
+			m_logger.setParentID(parent.getID());
+		}
 		
 
 		void pause();
@@ -46,6 +51,17 @@ namespace SQLiteWrapper
 	private slots:
 		void onFileChangedInternalSlot(QPrivateSignal*);
 		void onPollingTimerTimeout();
+
+	protected:
+		/**
+		 * @brief Helpoer function to log messages.
+		 * @param msg
+		 */
+		void debug(const std::string& msg) const { m_logger.debug(msg); }
+		void info(const std::string& msg) const { m_logger.info(msg); }
+		void warning(const std::string& msg) const { m_logger.warning(msg); }
+		void error(const std::string& msg) const { m_logger.error(msg); }
+
 	private:
 		bool hasChanged();
 		void clearFileChangedFlag();
@@ -73,5 +89,6 @@ namespace SQLiteWrapper
 		std::filesystem::file_time_type m_lastModificationTime;
 		std::atomic<bool> m_fileChanged;
 		std::atomic<bool> m_paused;
+		mutable Log::LogObject m_logger;
 	};
 }

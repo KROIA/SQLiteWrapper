@@ -9,6 +9,7 @@ namespace SQLiteWrapper
 		, m_logger("SQLite")
 		, m_watcher()
 	{
+		m_watcher.setLoggerParent(m_logger);
 		connect(&m_watcher, &FileChangeWatcher::onFileChanged, this, &SQLite::onDBFileChanged);
 	}
 	SQLite::SQLite(const std::string& dbPath)
@@ -17,6 +18,7 @@ namespace SQLiteWrapper
 		, m_logger("SQLite:" + dbPath)
 		, m_watcher(dbPath, FileChangeWatcher::Mode::polling)
 	{
+		m_watcher.setLoggerParent(m_logger);
 		connect(&m_watcher, &FileChangeWatcher::onFileChanged, this, &SQLite::onDBFileChanged);
 	}
 
