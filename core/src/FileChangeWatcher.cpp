@@ -167,6 +167,11 @@ namespace SQLiteWrapper
 		}
 	}
 
+	void FileChangeWatcher::debug(const std::string& msg) const { m_logger.logDebug(msg); }
+	void FileChangeWatcher::info(const std::string& msg) const { m_logger.info(msg); }
+	void FileChangeWatcher::warning(const std::string& msg) const { m_logger.warning(msg); }
+	void FileChangeWatcher::error(const std::string& msg) const { m_logger.error(msg); }
+
 	bool FileChangeWatcher::fileChanged()
 	{
 		std::filesystem::path file(m_path);

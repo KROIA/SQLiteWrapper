@@ -57,10 +57,10 @@ namespace SQLiteWrapper
 		 * @brief Helpoer function to log messages.
 		 * @param msg
 		 */
-		void debug(const std::string& msg) const { m_logger.debug(msg); }
-		void info(const std::string& msg) const { m_logger.info(msg); }
-		void warning(const std::string& msg) const { m_logger.warning(msg); }
-		void error(const std::string& msg) const { m_logger.error(msg); }
+		void debug(const std::string& msg) const;
+		void info(const std::string& msg) const;
+		void warning(const std::string& msg) const;
+		void error(const std::string& msg) const;
 
 	private:
 		bool hasChanged();
