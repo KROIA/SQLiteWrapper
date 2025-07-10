@@ -40,6 +40,8 @@ namespace SQLiteWrapper
 		}
 		m_logger.setName("SQLite:" + dbPath);
 		m_dbPath = dbPath;
+		open();
+		close();
 		m_watcher.setModeAndPath(FileChangeWatcher::Mode::polling, m_dbPath);
 	}
 
