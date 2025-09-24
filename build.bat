@@ -45,7 +45,7 @@ cmake -G %generator% -A %platform% -DQT_DEPLOY=ON -DRELATIVE_BUILD_FOLDER="%buil
 REM cmake Befehl f�rs kompilieren
 cmake --build . --config %buildType% --target install
 
-if %logErrorlevel% neq 0 (
+if %errorlevel% neq 0 (
     CALL::ECHO_COLOR "Build failed!", %RED%
     REM pause
     EXIT /B 1

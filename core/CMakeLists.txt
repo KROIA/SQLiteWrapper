@@ -29,7 +29,7 @@ if(QT_ENABLE)
         set(CMAKE_AUTORCC ON)
         #set(CMAKE_AUTOUIC ON)
     else()
-        message("logError: QT_MODULES is empty. Please specify the required modules or set the variable \"QT_ENABLE\" to OFF")
+        message("ERROR: QT_MODULES is empty. Please specify the required modules or set the variable \"QT_ENABLE\" to OFF")
     endif()
 endif()
 # end QT settings

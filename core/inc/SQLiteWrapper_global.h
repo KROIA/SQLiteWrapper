@@ -11,13 +11,13 @@
 #ifndef BUILD_STATIC
 	//#pragma message("SQLITEWRAPPER_LIB is a shared library")
 	#if defined(SQLITEWRAPPER_LIB)
-		#define SQLITE_WRAPPER_EXPORT __declspec(dllexport)
+		#define SQLITE_WRAPPER_API __declspec(dllexport)
 	#else
-		#define SQLITE_WRAPPER_EXPORT __declspec(dllimport)
+		#define SQLITE_WRAPPER_API __declspec(dllimport)
 	#endif
 #else 
 	//#pragma message("SQLITEWRAPPER_LIB is a static library")
-	#define SQLITE_WRAPPER_EXPORT
+	#define SQLITE_WRAPPER_API
 #endif
 
 /// USER_SECTION_START 2
@@ -54,8 +54,8 @@
 /// USER_SECTION_END
 
 #if defined(SQLITEWRAPPER_LIB)
-	#pragma warning (error : 4715) // not all control paths return a value shuld be an logError instead of a warning
-	#pragma warning (error : 4700) // uninitialized local variable used shuld be an logError instead of a warning
+	#pragma warning (error : 4715) // not all control paths return a value shuld be an error instead of a warning
+	#pragma warning (error : 4700) // uninitialized local variable used shuld be an error instead of a warning
 	#pragma warning (error : 4244) // Implicit conversions between data types 
 	#pragma warning (error : 4100) // Unused variables
 	#pragma warning (error : 4018) // Type mismatch 

@@ -70,7 +70,7 @@ ENDIF()
 
 if(NOT QT_VERSION STREQUAL "autoFind" AND DEFINED QT_VERSION)
     if(NOT EXISTS ${QT_INSTALL_BASE}/${QT_VERSION})
-        message(FATAL_logError "Can't find QT installation. Path: ${QT_INSTALL_BASE}/${QT_VERSION} does not exist")
+        message(FATAL_ERROR "Can't find QT installation. Path: ${QT_INSTALL_BASE}/${QT_VERSION} does not exist")
     endif()
 
     message("Using predefined Qt Version: ${QT_VERSION}")
@@ -181,7 +181,7 @@ IF(NOT QT_MISSING)
         
         MESSAGE("Qt${QT_MAJOR_VERSION}Config.cmake path:  ${Qt${QT_MAJOR_VERSION}_DIR}")
     else()
-        message(FATAL_logError "No QT${QT_MAJOR_VERSION} installation found. \n"
+        message(FATAL_ERROR "No QT${QT_MAJOR_VERSION} installation found. \n"
                             "Searching for compiler: ${QT_PATH}")
     endif()
 ENDIF()

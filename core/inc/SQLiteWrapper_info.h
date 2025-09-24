@@ -29,7 +29,7 @@ namespace SQLiteWrapper
 
 /// USER_SECTION_END
 
-	class SQLITE_WRAPPER_EXPORT LibraryInfo
+	class SQLITE_WRAPPER_API LibraryInfo
 	{
 		LibraryInfo() = delete;
 		LibraryInfo(const LibraryInfo&) = delete;

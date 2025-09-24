@@ -89,7 +89,7 @@ namespace SQLiteWrapper
 /// USER_SECTION_START 4
 
 /// USER_SECTION_END
-	class SQLITE_WRAPPER_EXPORT Profiler
+	class SQLITE_WRAPPER_API Profiler
 	{
 	public:
 		/// USER_SECTION_START 5
@@ -112,7 +112,7 @@ namespace SQLiteWrapper
 
 
 #if LOGGER_LIBRARY_AVAILABLE == 1
-	class SQLITE_WRAPPER_EXPORT Logger 
+	class SQLITE_WRAPPER_API Logger 
 	{
 		/// USER_SECTION_START 8
 
