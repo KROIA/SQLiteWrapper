@@ -24,7 +24,7 @@
 */
 #include <chrono>
 // Only allow static library build
-#define SQLITE_WRAPPER_EXPORT
+#define SQLITE_WRAPPER_API
 /// USER_SECTION_END
 
 #ifdef QT_ENABLED

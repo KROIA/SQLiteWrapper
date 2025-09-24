@@ -14,7 +14,7 @@ namespace SQLiteWrapper
 	 * @brief Watches a file for changes
 	 * A signal is emitted when the file changes
 	 */
-	class SQLITE_WRAPPER_EXPORT FileChangeWatcher : public QObject
+	class SQLITE_WRAPPER_API FileChangeWatcher : public QObject
 	{
 		Q_OBJECT
 	public:

@@ -19,7 +19,7 @@ namespace SQLiteWrapper
      *
      * @note The SQLite library must be linked in your project to use this class.
      */
-    class SQLITE_WRAPPER_EXPORT SQLite : public QObject
+    class SQLITE_WRAPPER_API SQLite : public QObject
     {
 		Q_OBJECT
     public:

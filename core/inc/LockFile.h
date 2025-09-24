@@ -9,7 +9,7 @@ namespace SQLiteWrapper
 	 * @brief This class creates a lock file. 
 	 * A locked lockfile can not be deleted by any other process.
 	 */
-	class SQLITE_WRAPPER_EXPORT LockFile
+	class SQLITE_WRAPPER_API LockFile
 	{
 	public:
 		enum LockStatus
