@@ -3,7 +3,7 @@
 #include "SQLiteWrapper_base.h"
 #include <string>
 #include <QObject>
-#include "sqlite3.h"
+
 #include "FileChangeWatcher.h"
 #include "LockFile.h"
 
