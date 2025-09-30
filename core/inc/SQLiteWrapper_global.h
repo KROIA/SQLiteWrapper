@@ -1,7 +1,9 @@
 #pragma once
 
 /// USER_SECTION_START 1
-
+#ifndef BUILD_STATIC
+#define BUILD_STATIC
+#endif
 /// USER_SECTION_END
 
 #include <chrono>

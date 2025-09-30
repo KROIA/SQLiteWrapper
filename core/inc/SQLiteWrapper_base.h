@@ -9,7 +9,7 @@
 #include "SQLiteWrapper_info.h"
 
 /// USER_SECTION_START 2
-#define SQLITE_API SQLITE_WRAPPER_API
+//#define SQLITE_API SQLITE_WRAPPER_API
 //#include "sqlite3ext.h"
 #include "sqlite3.h"
 
