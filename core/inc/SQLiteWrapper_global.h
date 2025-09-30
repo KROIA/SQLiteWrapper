@@ -24,6 +24,7 @@
 
 #include <chrono>
 // Only allow static library build
+#undef SQLITE_WRAPPER_API
 #define SQLITE_WRAPPER_API
 /// USER_SECTION_END
 
