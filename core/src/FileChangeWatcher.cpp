@@ -290,7 +290,7 @@ namespace SQLiteWrapper
 					std::unique_lock<std::mutex> lock(m_mutex);
 
 					m_fileChanged.store(true);
-					info("FileChangeWatcher: File changed: " + m_path);
+					debug("FileChangeWatcher: File changed: " + m_path);
 					emit onFileChangedInternal(nullptr);
 					while (m_fileChanged && !m_stopFlag.load()) {
 						QApplication::processEvents();
@@ -328,7 +328,7 @@ namespace SQLiteWrapper
 		if (md5 != m_md5 && m_md5 != "")
 		{
 			m_fileChanged.store(true);
-			info("FileChangeWatcher: File changed: " + m_path);
+			debug("FileChangeWatcher: File changed: " + m_path);
 		}
 		m_md5 = md5;
 	}

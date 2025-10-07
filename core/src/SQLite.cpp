@@ -57,7 +57,7 @@ namespace SQLiteWrapper
 			m_logger.logError("Failed to open database: " + m_dbPath);
 			return false;
 		}
-		m_logger.logInfo("Database opened successfully");
+		m_logger.debug("Database opened successfully");
 		return true;
 	}
 
@@ -71,7 +71,7 @@ namespace SQLiteWrapper
 				return false;
 			}
 			m_db = nullptr;
-			m_logger.logInfo("Database closed");
+			m_logger.debug("Database closed");
 			return true;
 		}
 		m_logger.logWarning("Database is already closed");
@@ -171,7 +171,7 @@ namespace SQLiteWrapper
 			m_logger.logError("Failed to remove database file: " + m_dbPath);
 			return false;
 		}
-		m_logger.logInfo("Database file removed: " + m_dbPath);
+		m_logger.debug("Database file removed: " + m_dbPath);
 		return true;
 	}
 
@@ -206,7 +206,7 @@ namespace SQLiteWrapper
 
 	bool SQLite::commitTransaction()
 	{
-		m_logger.logInfo("Committing transaction");
+		m_logger.debug("Committing transaction");
 		return execute("COMMIT;");
 	}
 
