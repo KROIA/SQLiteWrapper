@@ -163,7 +163,7 @@ namespace SQLiteWrapper
 	{
 		if (hasChanged())
 		{
-			emit onFileChanged(m_path);
+			onFileChangedInternalSlot(nullptr);
 		}
 	}
 
