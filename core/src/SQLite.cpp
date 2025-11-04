@@ -57,6 +57,7 @@ namespace SQLiteWrapper
 			m_logger.logError("Failed to open database: " + m_dbPath);
 			return false;
 		}
+		sqlite3_busy_timeout(m_db, m_busyTimeoutMs); // wait up to 5 seconds
 		m_logger.debug("Database opened successfully");
 		return true;
 	}
@@ -225,6 +226,15 @@ namespace SQLiteWrapper
 	sqlite3_int64 SQLite::getLastInsertRowId()
 	{
 		return sqlite3_last_insert_rowid(m_db);
+	}
+
+	void SQLite::setBusyTimeout(int milliseconds)
+	{
+		m_busyTimeoutMs = milliseconds;
+		if (m_db)
+		{
+			sqlite3_busy_timeout(m_db, m_busyTimeoutMs);
+		}
 	}
 
 	bool SQLite::isOpen() const

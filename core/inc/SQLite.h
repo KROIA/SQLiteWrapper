@@ -188,6 +188,11 @@ namespace SQLiteWrapper
         }
 
 
+        void setBusyTimeout(int milliseconds);
+		int getBusyTimeout() const { return m_busyTimeoutMs; }
+
+
+
     signals:
         void onDBChanged();
 
@@ -216,6 +221,8 @@ namespace SQLiteWrapper
         sqlite3* m_db; ///< SQLite database connection.
         Log::LogObject m_logger; ///< Logger for logError handling.
 		FileChangeWatcher m_watcher; ///< File change watcher for database file changes.
+
+		int m_busyTimeoutMs = 5000; ///< Busy timeout in milliseconds.
     };
 
 }
