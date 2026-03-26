@@ -167,9 +167,10 @@ namespace SQLiteWrapper
 		return widget;
 	}
 #else
-	QWidget* LibraryInfo::createInfoWidget(QWidget* parent)
+	QWidget* LibraryInfo::createInfoWidget(QWidget* parent, bool disableHyperlink)
 	{
 		SQLW_UNUSED(parent);
+		SQLW_UNUSED(disableHyperlink);
 		return nullptr;
 	}
 #endif
