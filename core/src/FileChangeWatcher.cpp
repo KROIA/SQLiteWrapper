@@ -21,6 +21,7 @@ namespace SQLiteWrapper
 		m_eventHandle.store(nullptr);
 		connect(&m_timer, &QTimer::timeout, this, &FileChangeWatcher::onPollingTimerTimeout);
 		connect(this, &FileChangeWatcher::onFileChangedInternal, this, &FileChangeWatcher::onFileChangedInternalSlot, Qt::QueuedConnection);
+		setPollingTimerInterval(1000); // check for changes every 1000 ms
 	}
 	FileChangeWatcher::FileChangeWatcher(const std::string& path)
 		: m_path(path)
@@ -33,6 +34,7 @@ namespace SQLiteWrapper
 		m_eventHandle.store(nullptr);
 		connect(&m_timer, &QTimer::timeout, this, &FileChangeWatcher::onPollingTimerTimeout);
 		connect(this, &FileChangeWatcher::onFileChangedInternal, this, &FileChangeWatcher::onFileChangedInternalSlot, Qt::QueuedConnection);
+		setPollingTimerInterval(1000); // check for changes every 1000 ms
 		startWatching();
 	}
 	FileChangeWatcher::FileChangeWatcher(const std::string& path, Mode mode)
@@ -46,6 +48,7 @@ namespace SQLiteWrapper
 		m_eventHandle.store(nullptr);
 		connect(&m_timer, &QTimer::timeout, this, &FileChangeWatcher::onPollingTimerTimeout);
 		connect(this, &FileChangeWatcher::onFileChangedInternal, this, &FileChangeWatcher::onFileChangedInternalSlot, Qt::QueuedConnection);
+		setPollingTimerInterval(1000); // check for changes every 1000 ms
 		startWatching();
 	}
 
@@ -116,7 +119,7 @@ namespace SQLiteWrapper
 		{
 			// start polling
 			checkFile();
-			m_timer.start(10);
+			m_timer.start();
 		}
 		else
 		{
