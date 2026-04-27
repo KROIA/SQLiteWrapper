@@ -317,6 +317,7 @@ namespace SQLiteWrapper
 	}
 	void FileChangeWatcher::checkFile()
 	{
+		SQLW_FILE_WATCHER_PROFILING_FUNCTION(SQLW_COLOR_STAGE_2);
 		bool success;
 		std::string md5 = calculateMD5Hash(success);
 		if (!success)
@@ -336,6 +337,7 @@ namespace SQLiteWrapper
 
 	std::string FileChangeWatcher::calculateMD5Hash(bool& success)
 	{
+		SQLW_FILE_WATCHER_PROFILING_FUNCTION(SQLW_COLOR_STAGE_3);
 		QFile file(m_path.c_str());
 		if (!file.open(QIODevice::ReadOnly)) {
 #ifdef SQLW_DEBUG
