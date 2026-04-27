@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <QObject>
 #include <QTimer>
+#include <QThread>
 #include "Logger.h"
 
 
@@ -20,7 +21,7 @@ namespace SQLiteWrapper
 	public:
 		enum Mode
 		{
-			polling,  // checks for a file change when asked
+			polling,  // background timer calculates hashes and sets a change flag
 			winApi    // Uses the "FindFirstChangeNotification" function to monitor file changes (does not work on network drives)
 		};
 		FileChangeWatcher();
@@ -38,14 +39,8 @@ namespace SQLiteWrapper
 		{
 			m_logger.setParentID(parent.getID());
 		}
-		void setPollingTimerInterval(int intervalMs)
-		{
-			m_timer.setInterval(intervalMs);
-		}
-		int getPollingTimerInterval() const
-		{
-			return m_timer.interval();
-		}
+		void setPollingTimerInterval(int intervalMs);
+		int getPollingTimerInterval() const;
 		
 
 		void pause();
@@ -91,6 +86,7 @@ namespace SQLiteWrapper
 		void checkFile();
 		std::string m_md5;
 		QTimer m_timer;
+		QThread* m_pollingThread = nullptr;
 
 		std::string m_path;
 		Mode m_mode;

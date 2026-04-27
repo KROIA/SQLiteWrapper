@@ -6,6 +6,43 @@
 #include <QCryptographicHash>
 #include <QByteArray>
 #include <QApplication>
+#include <functional>
+
+
+namespace
+{
+	class PollingTimerThread : public QThread
+	{
+	public:
+		PollingTimerThread(int intervalMs, std::function<void()> callback)
+			: m_intervalMs(intervalMs)
+			, m_callback(std::move(callback))
+		{
+		}
+
+	protected:
+		void run() override
+		{
+			QTimer timer;
+			timer.setInterval(m_intervalMs);
+			QObject::connect(&timer, &QTimer::timeout, &timer, [this]() {
+				if (m_callback)
+					m_callback();
+				});
+
+			if (m_callback)
+				m_callback();
+
+			timer.start();
+			exec();
+			timer.stop();
+		}
+
+	private:
+		int m_intervalMs = 1000;
+		std::function<void()> m_callback;
+	};
+}
 
 
 namespace SQLiteWrapper
@@ -57,6 +94,29 @@ namespace SQLiteWrapper
 		stopWatching();
 	}
 
+	void FileChangeWatcher::setPollingTimerInterval(int intervalMs)
+	{
+		if (intervalMs <= 0)
+			intervalMs = 1;
+
+		if (m_timer.interval() == intervalMs)
+			return;
+
+		const bool wasWatching = (m_mode == Mode::polling) && (m_pollingThread != nullptr);
+		if (wasWatching)
+			stopWatching();
+
+		m_timer.setInterval(intervalMs);
+
+		if (wasWatching)
+			startWatching();
+	}
+
+	int FileChangeWatcher::getPollingTimerInterval() const
+	{
+		return m_timer.interval();
+	}
+
 	void FileChangeWatcher::setMode(Mode mode)
 	{
 		if (mode == m_mode)
@@ -82,10 +142,7 @@ namespace SQLiteWrapper
 	}
 	bool FileChangeWatcher::hasChanged()
 	{
-		if (m_mode == Mode::polling)
-			checkFile();
-		std::unique_lock<std::mutex> lock(m_mutex);
-		return m_fileChanged;
+		return m_fileChanged.load();
 	}
 	void FileChangeWatcher::clearFileChangedFlag()
 	{
@@ -105,7 +162,7 @@ namespace SQLiteWrapper
 	void FileChangeWatcher::unpause()
 	{
 		m_paused.store(false);
-		if(m_mode == Mode::polling)
+		if (m_mode == Mode::polling)
 			m_timer.start();
 	}
 	bool FileChangeWatcher::isPaused() const
@@ -117,9 +174,18 @@ namespace SQLiteWrapper
 	{
 		if (m_mode == Mode::polling)
 		{
-			// start polling
-			checkFile();
-			m_timer.start();
+			if (!m_pollingThread)
+			{
+				m_md5.clear();
+				m_fileChanged.store(false);
+				m_pollingThread = new PollingTimerThread(m_timer.interval(), [this]() {
+					checkFile();
+					});
+				m_pollingThread->start();
+			}
+
+			if (!m_paused.load())
+				m_timer.start();
 		}
 		else
 		{
@@ -135,8 +201,14 @@ namespace SQLiteWrapper
 	{
 		if (m_mode == Mode::polling)
 		{
-			// stop polling
 			m_timer.stop();
+			if (m_pollingThread)
+			{
+				m_pollingThread->quit();
+				m_pollingThread->wait();
+				delete m_pollingThread;
+				m_pollingThread = nullptr;
+			}
 		}
 		else
 		{
@@ -321,6 +393,9 @@ namespace SQLiteWrapper
 	void FileChangeWatcher::checkFile()
 	{
 		SQLW_FILE_WATCHER_PROFILING_FUNCTION(SQLW_COLOR_STAGE_2);
+		if (m_paused.load())
+			return;
+
 		bool success;
 		std::string md5 = calculateMD5Hash(success);
 		if (!success)
