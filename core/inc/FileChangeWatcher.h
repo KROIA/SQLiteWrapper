@@ -38,6 +38,14 @@ namespace SQLiteWrapper
 		{
 			m_logger.setParentID(parent.getID());
 		}
+		void setPollingTimerInterval(int intervalMs)
+		{
+			m_timer.setInterval(intervalMs);
+		}
+		int getPollingTimerInterval() const
+		{
+			return m_timer.interval();
+		}
 		
 
 		void pause();

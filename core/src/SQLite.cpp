@@ -9,6 +9,7 @@ namespace SQLiteWrapper
 		, m_logger("SQLite")
 		, m_watcher()
 	{
+		m_watcher.setPollingTimerInterval(1000); // check for changes every 1000 ms
 		m_watcher.setLoggerParent(m_logger);
 		connect(&m_watcher, &FileChangeWatcher::onFileChanged, this, &SQLite::onDBFileChanged);
 	}
@@ -18,6 +19,7 @@ namespace SQLiteWrapper
 		, m_logger("SQLite:" + dbPath)
 		, m_watcher(dbPath, FileChangeWatcher::Mode::polling)
 	{
+		m_watcher.setPollingTimerInterval(1000); // check for changes every 1000 ms
 		m_watcher.setLoggerParent(m_logger);
 		connect(&m_watcher, &FileChangeWatcher::onFileChanged, this, &SQLite::onDBFileChanged);
 	}

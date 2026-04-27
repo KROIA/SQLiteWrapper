@@ -191,7 +191,22 @@ namespace SQLiteWrapper
         void setBusyTimeout(int milliseconds);
 		int getBusyTimeout() const { return m_busyTimeoutMs; }
 
-
+        void setFileWatcherMode(FileChangeWatcher::Mode mode)
+        {
+            m_watcher.setMode(mode);
+        }
+         FileChangeWatcher::Mode getFileWatcherMode() const
+        {
+            return m_watcher.getMode();
+        }
+         void setFileWatcherPollingInterval(int intervalMs)
+        {
+            m_watcher.setPollingTimerInterval(intervalMs);
+        }
+         int getFileWatcherPollingInterval() const
+        {
+            return m_watcher.getPollingTimerInterval();
+		 }
 
     signals:
         void onDBChanged();

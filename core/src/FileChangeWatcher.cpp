@@ -174,6 +174,7 @@ namespace SQLiteWrapper
 
 	bool FileChangeWatcher::fileChanged()
 	{
+		SQLW_FILE_WATCHER_PROFILING_FUNCTION(SQLW_COLOR_STAGE_2);
 		std::filesystem::path file(m_path);
 
 		if (!std::filesystem::exists(file)) {
