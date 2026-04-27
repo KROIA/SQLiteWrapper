@@ -23,6 +23,7 @@ namespace
 	protected:
 		void run() override
 		{
+			SQLW_FILE_WATCHER_PROFILING_THREAD("FileChangeWatcher");
 			QTimer timer;
 			timer.setInterval(m_intervalMs);
 			QObject::connect(&timer, &QTimer::timeout, &timer, [this]() {
