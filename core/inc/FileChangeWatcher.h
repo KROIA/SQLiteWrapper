@@ -8,6 +8,10 @@
 #include <QThread>
 #include "Logger.h"
 
+namespace 
+{
+	class PollingTimerThread;
+}
 
 namespace SQLiteWrapper
 {
@@ -15,6 +19,7 @@ namespace SQLiteWrapper
 	 * @brief Watches a file for changes
 	 * A signal is emitted when the file changes
 	 */
+	
 	class SQLITE_WRAPPER_API FileChangeWatcher : public QObject
 	{
 		Q_OBJECT
@@ -86,13 +91,14 @@ namespace SQLiteWrapper
 		void checkFile();
 		std::string m_md5;
 		QTimer m_timer;
-		QThread* m_pollingThread = nullptr;
+		PollingTimerThread* m_pollingThread = nullptr;
 
 		std::string m_path;
 		Mode m_mode;
 		std::filesystem::file_time_type m_lastModificationTime;
 		std::atomic<bool> m_fileChanged;
 		std::atomic<bool> m_paused;
+		unsigned int m_lastCheckTimeMillis = 0;
 		mutable Log::LogObject m_logger;
 	};
 }

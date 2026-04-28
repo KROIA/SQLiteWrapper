@@ -15,18 +15,28 @@ namespace
 	{
 	public:
 		PollingTimerThread(int intervalMs, std::function<void()> callback)
-			: m_intervalMs(intervalMs)
-			, m_callback(std::move(callback))
+			:m_callback(std::move(callback))
 		{
+			m_timer.setInterval(intervalMs);
 		}
+
+		void setTimerInterval(int intervalMs)
+		{
+			if (intervalMs <= 0)
+				intervalMs = 1;
+			m_timer.setInterval(intervalMs);
+		}
+		int getTimerInterval() const
+		{
+			return m_timer.interval();
+		}
+
 
 	protected:
 		void run() override
 		{
 			SQLW_FILE_WATCHER_PROFILING_THREAD("FileChangeWatcher");
-			QTimer timer;
-			timer.setInterval(m_intervalMs);
-			QObject::connect(&timer, &QTimer::timeout, &timer, [this]() {
+			QObject::connect(&m_timer, &QTimer::timeout, &m_timer, [this]() {
 				if (m_callback)
 					m_callback();
 				});
@@ -34,13 +44,13 @@ namespace
 			if (m_callback)
 				m_callback();
 
-			timer.start();
+			m_timer.start();
 			exec();
-			timer.stop();
+			m_timer.stop();
 		}
 
 	private:
-		int m_intervalMs = 1000;
+		QTimer m_timer;
 		std::function<void()> m_callback;
 	};
 }
@@ -397,6 +407,8 @@ namespace SQLiteWrapper
 		if (m_paused.load())
 			return;
 
+		auto startTime = std::chrono::steady_clock::now();
+
 		bool success;
 		std::string md5 = calculateMD5Hash(success);
 		if (!success)
@@ -410,6 +422,17 @@ namespace SQLiteWrapper
 		{
 			m_fileChanged.store(true);
 			debug("FileChangeWatcher: File changed: " + m_path);
+		}
+		auto endTime = std::chrono::steady_clock::now();
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+		m_lastCheckTimeMillis = static_cast<unsigned int>(duration.count());
+		if (m_pollingThread)
+		{
+			if (m_lastCheckTimeMillis > (unsigned)m_pollingThread->getTimerInterval())
+			{
+				info("FileChangeWatcher: Adjusting polling interval to " + std::to_string(m_lastCheckTimeMillis * 2) + " ms due to long check duration (" + std::to_string(m_lastCheckTimeMillis) + " ms)");
+				m_pollingThread->setTimerInterval(m_lastCheckTimeMillis * 2);
+			}
 		}
 		m_md5 = md5;
 	}
