@@ -36,6 +36,7 @@ namespace
 		void run() override
 		{
 			SQLW_FILE_WATCHER_PROFILING_THREAD("FileChangeWatcher");
+			m_timer.moveToThread(this);
 			QObject::connect(&m_timer, &QTimer::timeout, &m_timer, [this]() {
 				if (m_callback)
 					m_callback();
