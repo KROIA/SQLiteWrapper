@@ -3,6 +3,7 @@
 #include <fstream>
 #include <QFile>
 #include <QDir>
+#include <QTimer>
 #include <QCryptographicHash>
 #include <QByteArray>
 #include <QApplication>
@@ -15,20 +16,34 @@ namespace
 	{
 	public:
 		PollingTimerThread(int intervalMs, std::function<void()> callback)
-			:m_callback(std::move(callback))
+			: m_timerIntervalMs(intervalMs)
+			, m_callback(std::move(callback))
 		{
-			m_timer.setInterval(intervalMs);
+			
+		}
+		~PollingTimerThread()
+		{
+			if (m_timer)
+			{
+				m_timer->stop();
+				delete m_timer;
+				m_timer = nullptr;
+			}
+			quit();
+			wait();
 		}
 
 		void setTimerInterval(int intervalMs)
 		{
 			if (intervalMs <= 0)
 				intervalMs = 1;
-			m_timer.setInterval(intervalMs);
+			m_timerIntervalMs = intervalMs;
+			if(m_timer)
+				m_timer->setInterval(m_timerIntervalMs);
 		}
 		int getTimerInterval() const
 		{
-			return m_timer.interval();
+			return m_timerIntervalMs;
 		}
 
 
@@ -36,8 +51,8 @@ namespace
 		void run() override
 		{
 			SQLW_FILE_WATCHER_PROFILING_THREAD("FileChangeWatcher");
-			m_timer.moveToThread(this);
-			QObject::connect(&m_timer, &QTimer::timeout, &m_timer, [this]() {
+			m_timer = new QTimer();
+			QObject::connect(m_timer, &QTimer::timeout, m_timer, [this]() {
 				if (m_callback)
 					m_callback();
 				});
@@ -45,13 +60,14 @@ namespace
 			if (m_callback)
 				m_callback();
 
-			m_timer.start();
+			m_timer->start();
 			exec();
-			m_timer.stop();
+			m_timer->stop();
 		}
 
 	private:
-		QTimer m_timer;
+		int m_timerIntervalMs;
+		QTimer *m_timer = nullptr;
 		std::function<void()> m_callback;
 	};
 }
