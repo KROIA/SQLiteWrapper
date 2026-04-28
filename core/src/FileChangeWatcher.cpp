@@ -19,7 +19,7 @@ namespace
 			: m_timerIntervalMs(intervalMs)
 			, m_callback(std::move(callback))
 		{
-			
+
 		}
 		~PollingTimerThread()
 		{
@@ -38,12 +38,22 @@ namespace
 			if (intervalMs <= 0)
 				intervalMs = 1;
 			m_timerIntervalMs = intervalMs;
-			if(m_timer)
+			if (m_timer)
 				m_timer->setInterval(m_timerIntervalMs);
 		}
 		int getTimerInterval() const
 		{
 			return m_timerIntervalMs;
+		}
+		void stopTimer()
+		{
+			if (m_timer)
+				m_timer->stop();
+		}
+		void startTimer()
+		{
+			if (m_timer)
+				m_timer->start(m_timerIntervalMs);
 		}
 
 
@@ -60,14 +70,14 @@ namespace
 			if (m_callback)
 				m_callback();
 
-			m_timer->start();
+			m_timer->start(m_timerIntervalMs);
 			exec();
 			m_timer->stop();
 		}
 
 	private:
 		int m_timerIntervalMs;
-		QTimer *m_timer = nullptr;
+		QTimer* m_timer = nullptr;
 		std::function<void()> m_callback;
 	};
 }
@@ -84,7 +94,7 @@ namespace SQLiteWrapper
 		m_paused.store(false);
 		m_fileChanged.store(false);
 		m_eventHandle.store(nullptr);
-		connect(&m_timer, &QTimer::timeout, this, &FileChangeWatcher::onPollingTimerTimeout);
+		//connect(&m_timer, &QTimer::timeout, this, &FileChangeWatcher::onPollingTimerTimeout);
 		connect(this, &FileChangeWatcher::onFileChangedInternal, this, &FileChangeWatcher::onFileChangedInternalSlot, Qt::QueuedConnection);
 		setPollingTimerInterval(1000); // check for changes every 1000 ms
 	}
@@ -97,7 +107,7 @@ namespace SQLiteWrapper
 		m_paused.store(false);
 		m_fileChanged.store(false);
 		m_eventHandle.store(nullptr);
-		connect(&m_timer, &QTimer::timeout, this, &FileChangeWatcher::onPollingTimerTimeout);
+		//connect(&m_timer, &QTimer::timeout, this, &FileChangeWatcher::onPollingTimerTimeout);
 		connect(this, &FileChangeWatcher::onFileChangedInternal, this, &FileChangeWatcher::onFileChangedInternalSlot, Qt::QueuedConnection);
 		setPollingTimerInterval(1000); // check for changes every 1000 ms
 		startWatching();
@@ -111,7 +121,7 @@ namespace SQLiteWrapper
 		m_paused.store(false);
 		m_fileChanged.store(false);
 		m_eventHandle.store(nullptr);
-		connect(&m_timer, &QTimer::timeout, this, &FileChangeWatcher::onPollingTimerTimeout);
+		//connect(&m_timer, &QTimer::timeout, this, &FileChangeWatcher::onPollingTimerTimeout);
 		connect(this, &FileChangeWatcher::onFileChangedInternal, this, &FileChangeWatcher::onFileChangedInternalSlot, Qt::QueuedConnection);
 		setPollingTimerInterval(1000); // check for changes every 1000 ms
 		startWatching();
@@ -127,7 +137,9 @@ namespace SQLiteWrapper
 		if (intervalMs <= 0)
 			intervalMs = 1;
 
-		if (m_timer.interval() == intervalMs)
+		if (m_pollingThread)
+			m_pollingThread->setTimerInterval(intervalMs);
+		/*if (m_timer.interval() == intervalMs)
 			return;
 
 		const bool wasWatching = (m_mode == Mode::polling) && (m_pollingThread != nullptr);
@@ -137,12 +149,14 @@ namespace SQLiteWrapper
 		m_timer.setInterval(intervalMs);
 
 		if (wasWatching)
-			startWatching();
+			startWatching();*/
 	}
 
 	int FileChangeWatcher::getPollingTimerInterval() const
 	{
-		return m_timer.interval();
+		if (!m_pollingThread)
+			return 0;
+		return m_pollingThread->getTimerInterval();
 	}
 
 	void FileChangeWatcher::setMode(Mode mode)
@@ -159,7 +173,7 @@ namespace SQLiteWrapper
 			return;
 		stopWatching();
 		m_path = path;
-		startWatching();		
+		startWatching();
 	}
 	void FileChangeWatcher::setModeAndPath(Mode mode, const std::string& path)
 	{
@@ -184,14 +198,14 @@ namespace SQLiteWrapper
 	void FileChangeWatcher::pause()
 	{
 		m_paused.store(true);
-		if (m_mode == Mode::polling)
-			m_timer.stop();
+		if (m_mode == Mode::polling && m_pollingThread)
+			m_pollingThread->stopTimer();
 	}
 	void FileChangeWatcher::unpause()
 	{
 		m_paused.store(false);
-		if (m_mode == Mode::polling)
-			m_timer.start();
+		if (m_mode == Mode::polling && m_pollingThread)
+			m_pollingThread->startTimer();
 	}
 	bool FileChangeWatcher::isPaused() const
 	{
@@ -206,14 +220,14 @@ namespace SQLiteWrapper
 			{
 				m_md5.clear();
 				m_fileChanged.store(false);
-				m_pollingThread = new PollingTimerThread(m_timer.interval(), [this]() {
+				m_pollingThread = new PollingTimerThread(100, [this]() {
 					checkFile();
 					});
 				m_pollingThread->start();
 			}
 
-			if (!m_paused.load())
-				m_timer.start();
+			if (m_paused.load())
+				m_pollingThread->stopTimer();
 		}
 		else
 		{
@@ -229,7 +243,7 @@ namespace SQLiteWrapper
 	{
 		if (m_mode == Mode::polling)
 		{
-			m_timer.stop();
+			//m_timer.stop();
 			if (m_pollingThread)
 			{
 				m_pollingThread->quit();
@@ -262,13 +276,13 @@ namespace SQLiteWrapper
 		clearFileChangedFlag();
 		emit onFileChanged(m_path);
 	}
-	void FileChangeWatcher::onPollingTimerTimeout()
+	/*void FileChangeWatcher::onPollingTimerTimeout()
 	{
 		if (hasChanged())
 		{
 			onFileChangedInternalSlot(nullptr);
 		}
-	}
+	}*/
 
 	void FileChangeWatcher::debug(const std::string& msg) const { m_logger.logDebug(msg); }
 	void FileChangeWatcher::info(const std::string& msg) const { m_logger.info(msg); }
@@ -439,13 +453,15 @@ namespace SQLiteWrapper
 		{
 			m_fileChanged.store(true);
 			debug("FileChangeWatcher: File changed: " + m_path);
+			emit onFileChangedInternal(nullptr);
 		}
 		auto endTime = std::chrono::steady_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 		m_lastCheckTimeMillis = static_cast<unsigned int>(duration.count());
 		if (m_pollingThread)
 		{
-			if (m_lastCheckTimeMillis > (unsigned)m_pollingThread->getTimerInterval())
+			int currentInterval = m_pollingThread->getTimerInterval();
+			if (m_lastCheckTimeMillis > (unsigned)currentInterval)
 			{
 				info("FileChangeWatcher: Adjusting polling interval to " + std::to_string(m_lastCheckTimeMillis * 2) + " ms due to long check duration (" + std::to_string(m_lastCheckTimeMillis) + " ms)");
 				m_pollingThread->setTimerInterval(m_lastCheckTimeMillis * 2);
@@ -460,7 +476,7 @@ namespace SQLiteWrapper
 		QFile file(m_path.c_str());
 		if (!file.open(QIODevice::ReadOnly)) {
 #ifdef SQLW_DEBUG
-			error("FileChangeWatcher: Could not open file: " + m_path +" to calculate the MD5 hash");
+			error("FileChangeWatcher: Could not open file: " + m_path + " to calculate the MD5 hash");
 #endif
 			success = false;
 			return "";

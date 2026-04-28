@@ -58,7 +58,7 @@ namespace SQLiteWrapper
 		void onFileChangedInternal(QPrivateSignal*);
 	private slots:
 		void onFileChangedInternalSlot(QPrivateSignal*);
-		void onPollingTimerTimeout();
+		//void onPollingTimerTimeout();
 
 	protected:
 		/**
