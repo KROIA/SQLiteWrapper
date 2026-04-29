@@ -90,7 +90,7 @@ namespace SQLiteWrapper
 		// For polling mode
 		void checkFile();
 		std::string m_md5;
-		QTimer m_timer;
+		//QTimer m_timer;
 		PollingTimerThread* m_pollingThread = nullptr;
 
 		std::string m_path;
