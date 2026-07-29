@@ -1,3 +1,16 @@
+// @file SQLiteWrapper_debug.h
+// @brief Debug console output, profiling macros, and library-wide Logger.
+//
+// This header provides three facilities:
+//   1. Console macros that print to stdout in Debug builds and compile to
+//      nothing in Release builds.
+//   2. Profiling macros that wrap easy_profiler when the profiling build
+//      target is selected, and compile to nothing otherwise.
+//   3. A library-wide Logger singleton (available when the Logger dependency
+//      is present).
+//
+// @see EasyProfilerIntegration.md for profiling usage.
+// @see LoggerIntegration.md for logging usage.
 #pragma once
 #include "SQLiteWrapper_global.h"
 
@@ -5,7 +18,7 @@
 
 /// USER_SECTION_END
 
-// The Logger library is automaticly included if the logger dependency .cmake file is available
+// The Logger library is automatically included when the Logger dependency .cmake file is present.
 #if LOGGER_LIBRARY_AVAILABLE == 1
 	#include "Logger.h"
 #endif
@@ -14,7 +27,9 @@
 
 /// USER_SECTION_END
 
-// Debugging
+// ---------------------------------------------------------------------------
+// Console output macros (Debug builds only)
+// ---------------------------------------------------------------------------
 #ifdef NDEBUG
 	#define SQLW_CONSOLE(msg)
 	#define SQLW_CONSOLE_FUNCTION(msg)
@@ -24,7 +39,9 @@
 	#define SQLW_DEBUG
 	#define SQLW_CONSOLE_STREAM std::cout
 
+	// Print msg to stdout.
 	#define SQLW_CONSOLE(msg) SQLW_CONSOLE_STREAM << msg;
+	// Print the current function signature followed by msg to stdout.
 	#define SQLW_CONSOLE_FUNCTION(msg) SQLW_CONSOLE_STREAM << __PRETTY_FUNCTION__ << " " << msg;
 #endif
 
@@ -32,20 +49,33 @@
 
 /// USER_SECTION_END
 
+// ---------------------------------------------------------------------------
+// Profiling macros (wrap easy_profiler; no-ops when profiling is disabled)
+// ---------------------------------------------------------------------------
 #ifdef SQLW_PROFILING
 	#include "easy/profiler.h"
-	#include <easy/arbitrary_value.h> // EASY_VALUE, EASY_ARRAY are defined here
+	#include <easy/arbitrary_value.h>
 
+	// Scoped profiling block with an explicit color value.
 	#define SQLW_PROFILING_BLOCK_C(text, color) EASY_BLOCK(text, color)
+	// Non-scoped profiling block — must be closed with PROFILING_END_BLOCK.
 	#define SQLW_PROFILING_NONSCOPED_BLOCK_C(text, color) EASY_NONSCOPED_BLOCK(text, color)
+	// End a non-scoped profiling block.
 	#define SQLW_PROFILING_END_BLOCK EASY_END_BLOCK
+	// Profile the enclosing function with an explicit color value.
 	#define SQLW_PROFILING_FUNCTION_C(color) EASY_FUNCTION(color)
+	// Scoped profiling block using a color stage name (e.g. Cyan500).
 	#define SQLW_PROFILING_BLOCK(text, colorStage) SQLW_PROFILING_BLOCK_C(text,profiler::colors::  colorStage)
+	// Non-scoped profiling block using a color stage name.
 	#define SQLW_PROFILING_NONSCOPED_BLOCK(text, colorStage) SQLW_PROFILING_NONSCOPED_BLOCK_C(text,profiler::colors::  colorStage)
+	// Profile the enclosing function using a color stage name.
 	#define SQLW_PROFILING_FUNCTION(colorStage) SQLW_PROFILING_FUNCTION_C(profiler::colors:: colorStage)
+	// Assign a name to the current thread in the profiler output.
 	#define SQLW_PROFILING_THREAD(name) EASY_THREAD(name)
 
+	// Capture a named scalar value in the profiler timeline.
 	#define SQLW_PROFILING_VALUE(name, value) EASY_VALUE(name, value)
+	// Capture a named text string in the profiler timeline.
 	#define SQLW_PROFILING_TEXT(name, value) EASY_TEXT(name, value)
 
 #else
@@ -62,13 +92,15 @@
 	#define SQLW_PROFILING_TEXT(name, value)
 #endif
 
-// Special expantion tecniques are required to combine the color name
+// Token-pasting helper used to build color stage identifiers (e.g. Cyan500).
 #define CONCAT_SYMBOLS_IMPL(x, y) x##y
 #define CONCAT_SYMBOLS(x, y) CONCAT_SYMBOLS_IMPL(x, y)
 
-
-
-// Different color stages
+// ---------------------------------------------------------------------------
+// Color stage suffixes for profiling blocks.
+// Use these with the PROFILING_BLOCK / PROFILING_FUNCTION macros to visually
+// distinguish call depths in the easy_profiler timeline.
+// ---------------------------------------------------------------------------
 #define SQLW_COLOR_STAGE_1 50
 #define SQLW_COLOR_STAGE_2 100
 #define SQLW_COLOR_STAGE_3 200
@@ -79,16 +111,21 @@
 #define SQLW_COLOR_STAGE_8 700
 #define SQLW_COLOR_STAGE_9 800
 #define SQLW_COLOR_STAGE_10 900
-#define SQLW_COLOR_STAGE_11 A100 
-#define SQLW_COLOR_STAGE_12 A200 
-#define SQLW_COLOR_STAGE_13 A400 
-#define SQLW_COLOR_STAGE_14 A700 
+#define SQLW_COLOR_STAGE_11 A100
+#define SQLW_COLOR_STAGE_12 A200
+#define SQLW_COLOR_STAGE_13 A400
+#define SQLW_COLOR_STAGE_14 A700
 
 namespace SQLiteWrapper
 {
 /// USER_SECTION_START 4
 
 /// USER_SECTION_END
+
+	// Controls the easy_profiler runtime.
+	// Call start() before the code you want to profile and stop() afterwards.
+	// The profiler is only functional in the static-profile build target;
+	// in other targets the methods are no-ops.
 	class SQLITE_WRAPPER_API Profiler
 	{
 	public:
@@ -96,9 +133,11 @@ namespace SQLiteWrapper
 
 		/// USER_SECTION_END
 
-		// Implementation defined in LibraryName_info.cpp to save files.
+		// Enable profiling data collection.
 		static void start();
+		// Stop profiling and write results to "profile.prof".
 		static void stop();
+		// Stop profiling and write results to the given profilerOutputFile.
 		static void stop(const char* profilerOutputFile);
 
 		/// USER_SECTION_START 6
@@ -112,7 +151,13 @@ namespace SQLiteWrapper
 
 
 #if LOGGER_LIBRARY_AVAILABLE == 1
-	class SQLITE_WRAPPER_API Logger 
+	// Library-wide logger singleton backed by a Log::LogObject.
+	//
+	// All static methods delegate to a single internal LogObject whose name
+	// defaults to the library name. Use this class for log messages that
+	// belong to the library as a whole. For per-class logging, create your
+	// own Log::LogObject and set its parent to Logger::getID().
+	class SQLITE_WRAPPER_API Logger
 	{
 		/// USER_SECTION_START 8
 
@@ -134,8 +179,6 @@ namespace SQLiteWrapper
 		static Log::LoggerID getID();
 		static void setParentID(Log::LoggerID parentID);
 		static Log::LoggerID getParentID();
-
-
 
 		static void log(const Log::Message& msg);
 
@@ -171,7 +214,11 @@ namespace SQLiteWrapper
 }
 
 
-// General
+// ---------------------------------------------------------------------------
+// Default "General" profiling section.
+// Copy this block into USER_SECTION 3 to create additional profiling sections
+// with a different COLORBASE (see EasyProfilerIntegration.md).
+// ---------------------------------------------------------------------------
 #define SQLW_GENERAL_PROFILING_COLORBASE Cyan
 #define SQLW_GENERAL_PROFILING_BLOCK_C(text, color) SQLW_PROFILING_BLOCK_C(text, color)
 #define SQLW_GENERAL_PROFILING_NONSCOPED_BLOCK_C(text, color) SQLW_PROFILING_NONSCOPED_BLOCK_C(text, color)
