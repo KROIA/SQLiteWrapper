@@ -307,12 +307,11 @@ namespace SQLiteWrapper
 
 		// Check if the file has been modified since lastWriteTime
 		if (change > m_lastModificationTime) {
-			HANDLE fileHandle = CreateFile(
-#ifdef UNICODE
-				Utilities::strToWstr(m_path).c_str(),
-#else
+			// Explicit ...A variant: the path is a std::string and Qt6's CMake defines
+			// UNICODE while Qt5's does not. Calling the ANSI entry point directly keeps
+			// a single code path with the same behaviour under both Qt majors.
+			HANDLE fileHandle = CreateFileA(
 				m_path.c_str(),
-#endif                     
 				GENERIC_READ,
 				FILE_SHARE_READ,
 				nullptr,
@@ -353,11 +352,7 @@ namespace SQLiteWrapper
 			QDir dir = QDir::current();
 			directory = dir.absolutePath().toStdString();
 		}
-#ifdef UNICODE
-		m_eventHandle.store(FindFirstChangeNotification(Utilities::strToWstr(directory).c_str(), FALSE, FILE_NOTIFY_CHANGE_LAST_WRITE));
-#else
-		m_eventHandle.store(FindFirstChangeNotification(directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_LAST_WRITE));
-#endif
+		m_eventHandle.store(FindFirstChangeNotificationA(directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_LAST_WRITE));
 
 		if (m_eventHandle.load() == INVALID_HANDLE_VALUE) {
 			error("FileChangeWatcher: Starting directory monitoring: " + Utilities::getLastErrorString(GetLastError()));

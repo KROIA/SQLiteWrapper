@@ -22,12 +22,11 @@ namespace SQLiteWrapper
 	{
 		if (m_locked)
 			return LockStatus::alreadyLocked;
-		HANDLE fileHandle = CreateFile(
-#ifdef UNICODE
-			Utilities::strToWstr(m_path).c_str(),
-#else
+		// Explicit ...A variant: the path is a std::string and Qt6's CMake defines
+		// UNICODE while Qt5's does not. Calling the ANSI entry point directly keeps
+		// a single code path with the same behaviour under both Qt majors.
+		HANDLE fileHandle = CreateFileA(
 			m_path.c_str(),
-#endif
 			GENERIC_WRITE,
 			0,
 			nullptr,
@@ -69,13 +68,7 @@ namespace SQLiteWrapper
 		CloseHandle(m_handle);
 		m_handle = INVALID_HANDLE_VALUE;
 		// Delete file
-		DeleteFile(
-#ifdef UNICODE
-			Utilities::strToWstr(m_path).c_str()
-#else
-			m_path.c_str()
-#endif
-			);
+		DeleteFileA(m_path.c_str());
 		
 		
 		m_locked = false;
